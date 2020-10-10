@@ -12,16 +12,16 @@ def author_is_blacklisted(redditor : str):
 
     return False
 
-def add_comment(comment_id: int, replied: int):
-    sql.cur.execute("INSERT INTO Comments (CommentId, Replied) VALUES (?, ?)", [comment_id, replied])
+def add_comment(submission_id: str, comment_id: str, replied: int):
+    sql.cur.execute("INSERT INTO Comments (SubmissionId, CommentId, Replied) VALUES (?, ?)", [submission_id, comment_id, replied])
     sql.conn.commit()
 
-def comment_is_replied(comment_id : int):
-    sql.cur.execute("SELECT * FROM Comments WHERE CommentId = ? AND Replied = 1", [comment_id])
+def is_reply_limit_reached(submission_id : str, reply_limit : int):
+    sql.cur.execute("SELECT COUNT(*) FROM Comments WHERE SubmissionId = ? AND Replied = 1", [submission_id])
     result = sql.cur.fetchone()
-    if result:
+    if result[0] >= reply_limit:
         return True
-    
+
     return False
 
 def get_all_keywords():

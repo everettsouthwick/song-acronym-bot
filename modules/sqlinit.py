@@ -7,8 +7,9 @@ class SQLInit:
         self.cur.execute('''
                     CREATE TABLE IF NOT EXISTS "Comments" (
                         "Id"	INTEGER NOT NULL UNIQUE,
-                        "CommentId"	INTEGER NOT NULL UNIQUE,
-                        "Replied"	INTEGER NOT NULL DEFAULT 0,
+                        "SubmissionId"	TEXT NOT NULL,
+                        "CommentId"	TEXT UNIQUE,
+                        "Replied"	INTEGER DEFAULT 0,
                         PRIMARY KEY("Id" AUTOINCREMENT)
                     )
                 ''')

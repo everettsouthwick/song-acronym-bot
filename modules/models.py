@@ -15,11 +15,13 @@ class Blacklist(object):
 
 class Comment(object):
     id = 1
+    submission_id = 1
     comment_id = 1
     replied = 0
 
-    def __init__(self, id, comment_id, replied):
+    def __init__(self, id, submission_id, comment_id, replied):
         self.id = id
+        self.submission_id = submission_id
         self.comment_id = comment_id
         self.replied = replied
 
