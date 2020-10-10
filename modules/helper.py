@@ -14,6 +14,9 @@ def submissions_and_comments(subreddit, **kwargs):
     return results
 
 def process_post(post):
+    if should_delete(post):
+        return
+
     if not should_comment(post):
         return
 
@@ -28,7 +31,7 @@ def process_post(post):
         process_comment(post)
 
 def process_comment(comment : praw.models.Comment):
-    reply_text = format_reply(comment.body.lower())
+    reply_text = format_reply(comment.author.name, comment.body.lower())
 
     if reply_text != "":
         try:
@@ -38,7 +41,7 @@ def process_comment(comment : praw.models.Comment):
             print("Processing of comment failed!")
 
 def process_submission(submission : praw.models.Submission):
-    reply_text = format_reply(f"{submission.title.lower()} {submission.selftext.lower()}")
+    reply_text = format_reply(submission.author.name, f"{submission.title.lower()} {submission.selftext.lower()}")
 
     if reply_text != "":
         try:
@@ -47,20 +50,40 @@ def process_submission(submission : praw.models.Submission):
         except:
             print("Processing of submission failed!")
 
+def should_delete(post):
+    if hasattr(post, 'title'):
+        return False
+
+    match = find_match(post.body.lower(), 'delete')
+
+    if not post.is_root and match != -1:
+        parent = post.parent()
+        # Check if the parent comment is from us.
+        if parent.author != None and parent.author.name == 'songacronymbot':
+            comment_to_delete = parent
+            parent = parent.parent()
+            # Check to see if the parent of our comment is from the same author requesting the deletion.
+            if parent.author != None and parent.author.name == post.author.name:
+                # If it is, delete the comment.
+                comment_to_delete.delete()
+                return True
+            else:
+                print('SKIPPING :: Redditor requesting deletion is not the original author.')
+    
+    return False
+
 def should_comment(post):
     submission_id = post.id
-    comment_id = None
 
     if hasattr(post, 'body'):
         submission_id = post.submission.id
-        comment_id = post.id
 
     if post.author.name == "songacronymbot":
         print('SKIPPING :: Bot is author.')
         return False
 
-    if time.time() - post.created_utc > 180:
-        print('SKIPPING :: Post older than 3 minutes.')
+    if time.time() - post.created_utc > 300:
+        print('SKIPPING :: Post older than 5 minutes.')
         return False
 
     if is_summon_chain(post):
@@ -87,7 +110,6 @@ def is_summon_chain(post):
 
     if not post.is_root:
         parent = post.parent()
-        parent.refresh()
         if parent.author != None and parent.author.name == 'songacronymbot':
             return True
     
@@ -100,23 +122,24 @@ def is_already_replied(post):
     if hasattr(post, 'title'):
         replies = post.comments
     else:
+        post.refresh()
         replies = post.replies
+
     reply_count = len(list(replies))
 
     if reply_count != 0:
         for reply in replies:
             if reply.author != None and reply.author.name == 'songacronymbot':
                 replied = True
-                continue
+                break
 
     return replied
 
-
-def format_reply(text : str):
+def format_reply(author, text : str):
     reply_text = get_comment_text(text)
 
     if reply_text != "":
-        return add_footer(reply_text)
+        return add_footer(author, reply_text)
 
     return reply_text
 
@@ -133,6 +156,6 @@ def get_comment_text(text : str):
 def find_match(text, keyword):
     return text.find(keyword)
 
-def add_footer(text: str):
-    return f"{text}\n---\n\n^(_I am a bot. | DM for inquiries/feedback/opt-out._)"
+def add_footer(author, text: str):
+    return f"{text}\n---\n\n^(_I am a bot. | /u/{author} may reply with \"delete\" to remove comment. | DM for inquiries/feedback/opt-out._)"
 

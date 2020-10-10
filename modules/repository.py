@@ -13,7 +13,7 @@ def author_is_blacklisted(redditor : str):
     return False
 
 def add_comment(submission_id: str, comment_id: str, replied: int):
-    sql.cur.execute("INSERT INTO Comments (SubmissionId, CommentId, Replied) VALUES (?, ?)", [submission_id, comment_id, replied])
+    sql.cur.execute("INSERT INTO Comments (SubmissionId, CommentId, Replied) VALUES (?, ?, ?)", [submission_id, comment_id, replied])
     sql.conn.commit()
 
 def is_reply_limit_reached(submission_id : str, reply_limit : int):

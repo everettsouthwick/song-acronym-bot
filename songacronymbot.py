@@ -5,7 +5,7 @@ import praw
 r = praw.Reddit("songacronymbot")
 
 def stream():
-    subreddit = r.subreddit('taylorswift')
+    subreddit = r.subreddit('phantomalarm')
     stream = praw.models.util.stream_generator(lambda **kwargs: Helper.submissions_and_comments(subreddit, **kwargs))
     
     for post in stream:
