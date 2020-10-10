@@ -11,7 +11,8 @@ Simple bot for Reddit that replies to comments and submissions containing song a
 ## Getting Started
 
 1. Clone or download the project
-2. 
+2. Copy [`praw.ini.sample`](praw.ini.sample) to `praw.ini` and modify it with your details
+3. Execute `python song_acronym_bot.py`
 
 ## Features
 
