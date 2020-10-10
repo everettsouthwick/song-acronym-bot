@@ -1,4 +1,4 @@
-import modules.helper as Helper
+import modules.service as service
 import praw
 
 # Initialize Reddit instance.
@@ -6,9 +6,9 @@ r = praw.Reddit("songacronymbot")
 
 def stream():
     subreddit = r.subreddit('taylorswift')
-    stream = praw.models.util.stream_generator(lambda **kwargs: Helper.submissions_and_comments(subreddit, **kwargs))
+    stream = praw.models.util.stream_generator(lambda **kwargs: service.submissions_and_comments(subreddit, **kwargs))
     
     for post in stream:
-        Helper.process_post(post)
+        service.process_post(post)
 
 stream()
