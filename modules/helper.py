@@ -163,7 +163,12 @@ def get_comment_text(text : str):
         if match == -1:
             match = find_match(text, f"{keyword.keyword.lower()}'")
         if match == -1:
-            match = find_match(text, f"{keyword.keyword.lower()},")
+            match = find_match(text, f" {keyword.keyword.lower()},")
+        if match == -1:
+            match = find_match(text, f" {keyword.keyword.lower()}.")
+        if match == -1:
+            match = find_match(text, f" {keyword.keyword.lower()}?")
+
 
         if match != -1:
             comment_text += f"- {keyword.comment_text}\n"
@@ -174,5 +179,5 @@ def find_match(text, keyword):
     return text.find(keyword)
 
 def add_footer(author, text: str):
-    return f"{text}\n---\n\n^(_I am a bot. | /u/{author} may reply with `delete` to remove comment. | DM for inquiries/feedback/opt-out._)"
+    return f"{text}\n---\n\n^###### _This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
 
