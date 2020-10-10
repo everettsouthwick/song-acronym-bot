@@ -1,10 +1,21 @@
 from .models import Blacklist, Comment, Keyword
-from .repository import add_comment, author_is_blacklisted, get_all_keywords, is_reply_limit_reached
+from .repository import add_comment, author_is_blacklisted, get_all_keywords, is_reply_limit_reached, get_all_subreddits
 import praw
 import time
 
 # Initialize list of keywords we are looking for.
 keywords = get_all_keywords()
+
+def get_enabled_subreddits():
+    subreddits = ""
+    for subreddit in get_all_subreddits():
+        if subreddit.enabled:
+            if subreddits == "":
+                subreddits += subreddit.name
+            else:
+                subreddits += f"+{subreddit.name}"
+    
+    return subreddits
 
 def submissions_and_comments(subreddit, **kwargs):
     results = []

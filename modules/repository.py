@@ -1,8 +1,15 @@
-from .models import Keyword
+from .models import Keyword, Subreddit
 from .sqlinit import SQLInit
 import sqlite3
 
 sql = SQLInit()
+
+def get_all_subreddits():
+    subreddits = []
+    for row in sql.cur.execute("SELECT Id, SubredditId, Name, Enabled FROM Subreddits"):
+        subreddits.append(Subreddit(row[0], row[1], row[2], row[3]))
+    
+    return subreddits
 
 def author_is_blacklisted(redditor : str):
     sql.cur.execute("SELECT * FROM Blacklist WHERE Redditor = ? AND Blacklisted = 1", [redditor])

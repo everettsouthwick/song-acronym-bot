@@ -34,3 +34,15 @@ class Keyword(object):
         self.id = id
         self.keyword = keyword
         self.comment_text = comment_text
+
+class Subreddit(object):
+    id = 1
+    subreddit_id = 1
+    name = ""
+    enabled = 0
+
+    def __init__(self, id, subreddit_id, name, enabled):
+        self.id = id
+        self.subreddit_id = subreddit_id
+        self.name = name
+        self.enabled = enabled
