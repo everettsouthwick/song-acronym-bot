@@ -1,4 +1,4 @@
-# reddit-song-acronym-bot
+# song-acronym-bot
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightscreen.svg)
 
 Simple bot for Reddit that replies to comments and submissions containing song acronyms with the full song title.
@@ -11,7 +11,8 @@ Simple bot for Reddit that replies to comments and submissions containing song a
 ## Getting Started
 
 1. Clone or download the project
-2. 
+2. Copy [`praw.ini.sample`](praw.ini.sample) to `praw.ini` and modify it with your details
+3. Execute `python song_acronym_bot.py`
 
 ## Features
 
