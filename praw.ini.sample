@@ -1,0 +1,6 @@
+[songacronymbot]
+client_id=id
+client_secret=secret
+password=password
+username=username
+user_agent=script:username:version (by /u/username)
