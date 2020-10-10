@@ -8,11 +8,16 @@ Simple bot for Reddit that replies to comments and submissions containing song a
 - [Python3.6+](https://www.python.org/downloads/)
 - [Praw](https://praw.readthedocs.io/en/latest/getting_started/installation.html)
 
+## Getting Started
+
+1. Clone or download the project
+2. 
+
 ## Features
 
 * Replies to comments and submissions that contain song acronyms with full song title
 * Anti-spam & anti-abuse measures
-* Opt-out on user basis, original author can delete comment by replying with `delete`.
+* Opt-out on user basis, original author can delete comment by replying with `delete`
 
 ## TODO
 
