@@ -179,5 +179,5 @@ def find_match(text, keyword):
     return text.find(keyword)
 
 def add_footer(author, text: str):
-    return f"{text}\n---\n\n^###### _This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
+    return f"{text}\n---\n\n^(This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
 
