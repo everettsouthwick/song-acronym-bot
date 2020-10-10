@@ -1,4 +1,4 @@
-# reddit-song-acronym-bot
+# song-acronym-bot
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightscreen.svg)
 
 Simple bot for Reddit that replies to comments and submissions containing song acronyms with the full song title.
