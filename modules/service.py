@@ -192,4 +192,4 @@ def is_match(text, keyword):
     
 
 def add_footer(author, text: str):
-    return f"{text}\n---\n\n^(This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out.)"
+    return f"{text}\n---\n\n^(_This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
