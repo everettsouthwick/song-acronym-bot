@@ -2,6 +2,7 @@ from .models import Blacklist, Comment, Keyword
 from .repository import add_comment, author_is_disabled, get_all_keywords_by_subreddit, is_reply_limit_reached, get_all_subreddits
 import praw
 import time
+import os
 
 def get_enabled_subreddits():
     subreddits = ""
@@ -95,7 +96,7 @@ def should_comment(post):
     if post.author.name == "songacronymbot":
         return False
 
-    if time.time() - post.created_utc > 180:
+    if time.time() - post.created_utc > 600:
         return False
 
     if is_summon_chain(post):
@@ -172,8 +173,10 @@ def get_comment_text(post):
             
     return comment_text
 
-
 def is_match(text, keyword):
+    if os.getenv('DEBUG'):
+        print(f"is_match(text: {text}, keyword: {keyword})")
+
     match = text.find(keyword)
     if match != -1:
         if match > 0:
@@ -185,11 +188,14 @@ def is_match(text, keyword):
 
         word = text[start:end]
         word = "".join(char for char in word if char.isalnum())
+
+        if os.getenv('DEBUG'):
+            print(f"is_match() word: {word}")
+
         if word == keyword:
             return True
 
     return False
     
-
 def add_footer(author, text: str):
     return f"{text}\n---\n\n^(_This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
