@@ -1,10 +1,7 @@
 from .models import Blacklist, Comment, Keyword
-from .repository import add_comment, author_is_blacklisted, get_all_keywords, is_reply_limit_reached, get_all_subreddits
+from .repository import add_comment, author_is_disabled, get_all_keywords_by_subreddit, is_reply_limit_reached, get_all_subreddits
 import praw
 import time
-
-# Initialize list of keywords we are looking for.
-keywords = get_all_keywords()
 
 def get_enabled_subreddits():
     subreddits = ""
@@ -14,6 +11,8 @@ def get_enabled_subreddits():
                 subreddits += subreddit.name
             else:
                 subreddits += f"+{subreddit.name}"
+
+    print(f"Monitoring the following subreddits: {subreddits}")
     
     return subreddits
 
@@ -42,7 +41,7 @@ def process_post(post):
         process_comment(post)
 
 def process_comment(comment : praw.models.Comment):
-    reply_text = format_reply(comment.author.name, comment.body.lower())
+    reply_text = format_reply(comment)
 
     if reply_text != "":
         try:
@@ -50,9 +49,11 @@ def process_comment(comment : praw.models.Comment):
             add_comment(comment.submission.id, comment.id, 1)
         except:
             print("Processing of comment failed!")
+    else:
+        print('SKIPPING :: No matching keyword.')
 
 def process_submission(submission : praw.models.Submission):
-    reply_text = format_reply(submission.author.name, f"{submission.title.lower()} {submission.selftext.lower()}")
+    reply_text = format_reply(submission)
 
     if reply_text != "":
         try:
@@ -60,12 +61,14 @@ def process_submission(submission : praw.models.Submission):
             add_comment(submission.id, None, 1)
         except:
             print("Processing of submission failed!")
+    else:
+        print('SKIPPING :: No matching keyword.')
 
 def should_delete(post):
     if hasattr(post, 'title'):
         return False
 
-    match = find_match(post.body.lower(), 'delete')
+    match = is_match(post.body.lower(), 'delete')
 
     if not post.is_root and match != -1:
         parent = post.parent()
@@ -90,11 +93,9 @@ def should_comment(post):
         submission_id = post.submission.id
 
     if post.author.name == "songacronymbot":
-        print('SKIPPING :: Bot is author.')
         return False
 
-    if time.time() - post.created_utc > 300:
-        print('SKIPPING :: Post older than 5 minutes.')
+    if time.time() - post.created_utc > 180:
         return False
 
     if is_summon_chain(post):
@@ -105,8 +106,8 @@ def should_comment(post):
         print('SKIPPING :: Already replied to.')
         return False
 
-    if author_is_blacklisted(post.author.name):
-        print('SKIPPING :: Author is blacklisted.')
+    if author_is_disabled(post.author.name):
+        print('SKIPPING :: Author is disabled.')
         return False
     
     if is_reply_limit_reached(submission_id, 5):
@@ -146,49 +147,49 @@ def is_already_replied(post):
 
     return replied
 
-def format_reply(author, text : str):
-    reply_text = get_comment_text(text)
+def format_reply(post):
+    reply_text = get_comment_text(post)
 
     if reply_text != "":
-        return add_footer(author, reply_text)
+        return add_footer(post.author.name, reply_text)
 
     return reply_text
 
-def get_comment_text(text : str):
+def get_comment_text(post):
+    keywords = get_all_keywords_by_subreddit(post.subreddit.id)
+
+    text = ""
+    if hasattr(post, 'title'):
+        text = f"{post.title.lower()} {post.selftext.lower()}"
+    else:
+        text = post.body.lower()
+
     comment_text = ""
+    
     for keyword in keywords:
-        match = find_match(text, f" {keyword.keyword.lower()} ")
-        
-        if match == -1:
-            match = find_match(text, f"{keyword.keyword.lower()}\"")
-        if match == -1:
-            match = find_match(text, f"{keyword.keyword.lower()})")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()}:")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()};")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()}]")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()}:")
-        if match == -1:
-            match = find_match(text, f"{keyword.keyword.lower()}'")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()},")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()}.")
-        if match == -1:
-            match = find_match(text, f" {keyword.keyword.lower()}?")
-
-
-        if match != -1:
+        if is_match(text, keyword.keyword.lower()):
             comment_text += f"- {keyword.comment_text}\n"
             
     return comment_text
 
-def find_match(text, keyword):
-    return text.find(keyword)
+
+def is_match(text, keyword):
+    match = text.find(keyword)
+    if match != -1:
+        if match > 0:
+            start = match - 1
+        else:
+            start = match
+
+        end = match + len(keyword) + 1
+
+        word = text[start:end]
+        word = "".join(char for char in word if char.isalnum())
+        if word == keyword:
+            return True
+
+    return False
+    
 
 def add_footer(author, text: str):
-    return f"{text}\n---\n\n^(This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out._)"
-
+    return f"{text}\n---\n\n^(This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | DM for inquiries/feedback/opt-out.)"

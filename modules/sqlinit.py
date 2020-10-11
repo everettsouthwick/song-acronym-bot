@@ -5,14 +5,6 @@ class SQLInit:
         self.conn = sqlite3.connect("main.db")
         self.cur = self.conn.cursor()
         self.cur.execute('''
-                    CREATE TABLE IF NOT EXISTS "Blacklist" (
-                        "Id"	INTEGER NOT NULL UNIQUE,
-                        "Redditor"	TEXT NOT NULL UNIQUE,
-                        "Blacklisted"	INTEGER NOT NULL DEFAULT 0,
-                        PRIMARY KEY("Id" AUTOINCREMENT)
-                    )
-                ''')
-        self.cur.execute('''
                     CREATE TABLE IF NOT EXISTS "Comments" (
                         "Id"	INTEGER NOT NULL UNIQUE,
                         "SubmissionId"	TEXT NOT NULL,
@@ -24,8 +16,18 @@ class SQLInit:
         self.cur.execute('''
                     CREATE TABLE IF NOT EXISTS "Keywords" (
                         "Id"	INTEGER NOT NULL UNIQUE,
-                        "Keyword"	TEXT NOT NULL UNIQUE,
-                        "CommentText"	TEXT NOT NULL UNIQUE,
+                        "Keyword"	TEXT NOT NULL,
+                        "CommentText"	TEXT NOT NULL,
+                        "SubredditId"	TEXT NOT NULL,
+                        PRIMARY KEY("Id" AUTOINCREMENT)
+                    )
+                ''')
+        self.cur.execute('''
+                    CREATE TABLE IF NOT EXISTS "Redditors" (
+                        "Id"	INTEGER NOT NULL UNIQUE,
+                        "RedditorId"	TEXT NOT NULL UNIQUE,
+                        "Name"	INTEGER NOT NULL UNIQUE,
+                        "Enabled"	INTEGER DEFAULT 0,
                         PRIMARY KEY("Id" AUTOINCREMENT)
                     )
                 ''')

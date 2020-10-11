@@ -1,7 +1,6 @@
 import modules.service as service
 import praw
 
-# Initialize Reddit instance.
 r = praw.Reddit("songacronymbot")
 
 def stream():

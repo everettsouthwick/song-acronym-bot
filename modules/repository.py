@@ -11,8 +11,8 @@ def get_all_subreddits():
     
     return subreddits
 
-def author_is_blacklisted(redditor : str):
-    sql.cur.execute("SELECT * FROM Blacklist WHERE Redditor = ? AND Blacklisted = 1", [redditor])
+def author_is_disabled(redditor : str):
+    sql.cur.execute("SELECT * FROM Redditors WHERE Name = ? AND Enabled = 0", [redditor])
     result = sql.cur.fetchone()
     if result:
         return True
@@ -31,9 +31,9 @@ def is_reply_limit_reached(submission_id : str, reply_limit : int):
 
     return False
 
-def get_all_keywords():
+def get_all_keywords_by_subreddit(subreddit_id : str):
     keywords = []
-    for row in sql.cur.execute("SELECT Id, Keyword, CommentText FROM Keywords"):
+    for row in sql.cur.execute("SELECT Id, Keyword, CommentText FROM Keywords WHERE SubredditId = ?", [subreddit_id]):
         keywords.append(Keyword(row[0], row[1], row[2]))
         
     return keywords
