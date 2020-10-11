@@ -31,10 +31,10 @@ Lover
 
 Other
 
-    Beautiful Ghosts
+    ma&thp
     Christmas Tree Farm
     Eyes Open
     Lover Shawn Mendes Remix
     Only The Young
 
-'''.lower(), 'yntcd')
+'''.lower(), 'ma&thp')

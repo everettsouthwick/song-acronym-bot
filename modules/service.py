@@ -187,7 +187,7 @@ def is_match(text, keyword):
         end = match + len(keyword) + 1
 
         word = text[start:end]
-        word = "".join(char for char in word if char.isalnum())
+        word = "".join(char for char in word if char.isalnum() or char == '&')
 
         if os.getenv('DEBUG'):
             print(f"is_match() word: {word}")
