@@ -23,6 +23,16 @@ def add_comment(submission_id: str, comment_id: str, replied: int):
     sql.cur.execute("INSERT INTO Comments (SubmissionId, CommentId, Replied) VALUES (?, ?, ?)", [submission_id, comment_id, replied])
     sql.conn.commit()
 
+def add_or_update_redditor(redditor_id : str, name : str, enabled : int):
+    try:
+        # Try to insert the record.
+        sql.cur.execute("INSERT INTO Redditors (RedditorId, Name, Enabled) VALUES (?, ?, ?)", [redditor_id, name, enabled])
+        sql.conn.commit()
+    except:
+        # If this fails, then it must be an update.
+        sql.cur.execute("UPDATE Redditors SET Enabled = ? WHERE RedditorId = ?", [enabled, redditor_id])
+        sql.conn.commit()
+
 def is_reply_limit_reached(submission_id : str, reply_limit : int):
     sql.cur.execute("SELECT COUNT(*) FROM Comments WHERE SubmissionId = ? AND Replied = 1", [submission_id])
     result = sql.cur.fetchone()

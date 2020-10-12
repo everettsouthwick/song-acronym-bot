@@ -1,8 +1,10 @@
 from .models import Blacklist, Comment, Keyword
-from .repository import add_comment, author_is_disabled, get_all_keywords_by_subreddit, is_reply_limit_reached, get_all_subreddits
+from .repository import add_comment, author_is_disabled, get_all_keywords_by_subreddit, is_reply_limit_reached, get_all_subreddits, add_or_update_redditor
 import praw
 import time
 import os
+
+debug = bool(os.getenv('DEBUG') == 'True')
 
 def get_enabled_subreddits():
     subreddits = ""
@@ -13,7 +15,8 @@ def get_enabled_subreddits():
             else:
                 subreddits += f"+{subreddit.name}"
 
-    print(f"Monitoring the following subreddits: {subreddits}")
+    if debug:
+        print(f"SUBREDDITS :: Monitoring the following subreddits: {subreddits}")
     
     return subreddits
 
@@ -25,20 +28,25 @@ def submissions_and_comments(subreddit, **kwargs):
     return results
 
 def process_post(post):
+    if not should_comment(post):
+        return
+
     if should_delete(post):
         return
 
-    if not should_comment(post):
+    if should_opt_out(post):
         return
 
     # If this post has a title property then it is a submission.
     if hasattr(post, 'title'):
-        print(f"SUBMISSION {post.permalink} :: {post.title}")
+        if debug:
+            print(f"SUBMISSION {post.permalink} :: {post.title}")
         process_submission(post)
 
     # Otherwise, this post is a comment.
     else:
-        print(f"COMMENT {post.permalink} :: {post.body}")
+        if debug:
+            print(f"COMMENT {post.permalink} :: {post.body}")
         process_comment(post)
 
 def process_comment(comment : praw.models.Comment):
@@ -49,9 +57,10 @@ def process_comment(comment : praw.models.Comment):
             comment.reply(reply_text)
             add_comment(comment.submission.id, comment.id, 1)
         except:
-            print("Processing of comment failed!")
+            print("ERROR :: Processing of comment failed!")
     else:
-        print('SKIPPING :: No matching keyword.')
+        if debug:
+            print('SKIPPING :: No matching keyword.')
 
 def process_submission(submission : praw.models.Submission):
     reply_text = format_reply(submission)
@@ -61,9 +70,22 @@ def process_submission(submission : praw.models.Submission):
             submission.reply(reply_text)
             add_comment(submission.id, None, 1)
         except:
-            print("Processing of submission failed!")
+            print("ERROR :: Processing of submission failed!")
     else:
-        print('SKIPPING :: No matching keyword.')
+        if debug:
+            print('SKIPPING :: No matching keyword.')
+
+def should_opt_out(post):
+    if hasattr(post, 'title'):
+        return False
+
+    if is_match(post.body.lower(), 'optout'):
+        submission = post.submission
+
+        if submission.id == 'j9yq8q':
+            add_or_update_redditor(post.author.id, post.author.name, 0)
+            post.reply(add_footer(post.author.name, f"- Your account has been disabled from receiving automatic replies. At this time, there is no automatic process to re-enable your account.\n"))
+            return True
 
 def should_delete(post):
     if hasattr(post, 'title'):
@@ -174,7 +196,7 @@ def get_comment_text(post):
     return comment_text
 
 def is_match(text, keyword):
-    if os.getenv('DEBUG'):
+    if debug:
         print(f"is_match(text: {text}, keyword: {keyword})")
 
     match = text.find(keyword)
@@ -186,10 +208,11 @@ def is_match(text, keyword):
 
         end = match + len(keyword) + 1
 
+        # We want to remove all the special characters from our word.
         word = text[start:end]
-        word = "".join(char for char in word if char.isalnum() or char == '&')
+        word = "".join(char for char in word if char.isalnum() or char == '&' or char == '-')
 
-        if os.getenv('DEBUG'):
+        if debug:
             print(f"is_match() word: {word}")
 
         if word == keyword:

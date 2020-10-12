@@ -1,5 +1,8 @@
 import modules.service as service
 import praw
+import os
+
+os.environ['DEBUG'] = 'False'
 
 r = praw.Reddit("songacronymbot")
 
