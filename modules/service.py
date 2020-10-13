@@ -28,10 +28,10 @@ def submissions_and_comments(subreddit, **kwargs):
     return results
 
 def process_post(post):
-    if not should_comment(post):
+    if should_delete(post):
         return
 
-    if should_delete(post):
+    if not should_comment(post):
         return
 
     if should_opt_out(post):
