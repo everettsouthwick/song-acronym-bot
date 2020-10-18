@@ -91,21 +91,20 @@ def should_delete(post):
     if hasattr(post, 'title'):
         return False
 
-    match = is_match(post.body.lower(), 'delete')
-
-    if not post.is_root and match != -1:
-        parent = post.parent()
-        # Check if the parent comment is from us.
-        if parent.author != None and parent.author.name == 'songacronymbot':
-            comment_to_delete = parent
-            parent = parent.parent()
-            # Check to see if the parent of our comment is from the same author requesting the deletion.
-            if parent.author != None and parent.author.name == post.author.name:
-                # If it is, delete the comment.
-                comment_to_delete.delete()
-                return True
-            else:
-                print('SKIPPING :: Redditor requesting deletion is not the original author.')
+    if not post.is_root:
+        if is_match(post.body.lower(), 'delete'):
+            parent = post.parent()
+            # Check if the parent comment is from us.
+            if parent.author != None and parent.author.name == 'songacronymbot':
+                comment_to_delete = parent
+                parent = parent.parent()
+                # Check to see if the parent of our comment is from the same author requesting the deletion.
+                if parent.author != None and parent.author.name == post.author.name:
+                    # If it is, delete the comment.
+                    comment_to_delete.delete()
+                    return True
+                else:
+                    print('SKIPPING :: Redditor requesting deletion is not the original author.')
     
     return False
 
