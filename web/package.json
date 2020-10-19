@@ -1,0 +1,30 @@
+{
+  "name": "song-acronym-bot",
+  "version": "1.0.0",
+  "description": "Web interface for song-acronym-bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/everettsouthwick/song-acronym-bot.git"
+  },
+  "keywords": [
+    "reddit",
+    "music",
+    "songs",
+    "taylor-swift",
+    "bot"
+  ],
+  "author": "Everett Southwick",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/everettsouthwick/song-acronym-bot/issues"
+  },
+  "homepage": "https://github.com/everettsouthwick/song-acronym-bot#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "sqlite": "^4.0.15"
+  }
+}
