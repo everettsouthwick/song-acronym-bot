@@ -43,7 +43,7 @@ def is_reply_limit_reached(submission_id : str, reply_limit : int):
 
 def get_all_keywords_by_subreddit(subreddit_id : str):
     keywords = []
-    for row in sql.cur.execute("SELECT Id, Keyword, CommentText FROM Keywords WHERE SubredditId = ?", [subreddit_id]):
+    for row in sql.cur.execute("SELECT Id, Keyword, CommentText FROM Keywords WHERE SubredditId = ? OR SubredditId = 'global'", [subreddit_id]):
         keywords.append(Keyword(row[0], row[1], row[2]))
         
     return keywords
