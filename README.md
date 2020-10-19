@@ -19,8 +19,13 @@ Simple bot for Reddit that replies to comments and submissions containing song a
 * Replies to comments and submissions that contain song acronyms with full song title
 * Anti-spam & anti-abuse measures
 * Opt-out on user basis, original author can delete comment by replying with `delete`
+* Acronyms enabled on a subreddit-by-subreddit basis to prevent crowding
+
+## Links
+
+- [Suggest New Song Acronyms](https://forms.gle/jrAooXn3jqWcbdTL7)
 
 ## TODO
 
-- Add tests
-- Add more subreddits on opt-in basis
+- Build out testing suite
+- Add ability for acronyms to be global
