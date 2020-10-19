@@ -25,6 +25,6 @@
   "homepage": "https://github.com/everettsouthwick/song-acronym-bot#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "sqlite": "^4.0.15"
+    "sqlite3": "^5.0.0"
   }
 }
