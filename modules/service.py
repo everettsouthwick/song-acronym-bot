@@ -84,7 +84,7 @@ def should_opt_out(post):
 
         if submission.id == 'j9yq8q':
             add_or_update_redditor(post.author.id, post.author.name, 0)
-            post.reply(add_footer(post.author.name, f"- Your account has been disabled from receiving automatic replies. At this time, there is no automatic process to re-enable your account.\n"))
+            post.reply(add_footer(post, f"- Your account has been disabled from receiving automatic replies. At this time, there is no automatic process to re-enable your account.\n"))
             return True
 
 def should_delete(post):
@@ -173,7 +173,7 @@ def format_reply(post):
     reply_text = get_comment_text(post)
 
     if reply_text != "":
-        return add_footer(post.author.name, reply_text)
+        return add_footer(post, reply_text)
 
     return reply_text
 
@@ -219,5 +219,5 @@ def is_match(text, keyword):
 
     return False
     
-def add_footer(author, text: str):
-    return f"{text}\n---\n\n^(_This is an automated reply. | /u/{author} can reply with \"delete\" to remove this comment. | /r/songacronymbot for inquiries/feedback/opt-in/opt-out._)"
+def add_footer(post, text: str):
+    return f"{text}\n---\n\nThis is an automated reply to help others understand your acronyms. | /u/{post.author.name} can reply with `delete` to remove this comment. | [Acronyms list for this subreddit.](https://acronym.strideweb.dev/{post.subreddit.id}) | /r/songacronymbot for inquiries/feedback/opt-in/opt-out."
