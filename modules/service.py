@@ -169,6 +169,8 @@ def is_already_replied(post):
 
     return replied
 
+
+
 def format_reply(post):
     reply_text = get_comment_text(post)
 
@@ -190,9 +192,24 @@ def get_comment_text(post):
     
     for keyword in keywords:
         if is_match(text, keyword.keyword.lower()):
-            comment_text += f"- {keyword.comment_text}\n"
+            if unique_keyword(post, keyword.keyword.lower()):
+                comment_text += f"- {keyword.comment_text}\n"
             
     return comment_text
+
+def unique_keyword(post, keyword):
+    if hasattr(post, 'title'):
+        submission = post
+    else:
+        submission = post.submission
+    
+    submission.comments.replace_more(limit=None)
+    for comment in submission.comments.list():
+        if comment.author.name == 'songacronymbot':
+            if keyword in comment.body.lower():
+                return False
+    
+    return True
 
 def is_match(text, keyword):
     if debug:
