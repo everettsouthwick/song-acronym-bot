@@ -237,4 +237,4 @@ def is_match(text, keyword):
     return False
     
 def add_footer(post, text: str):
-    return f"{text}\n---\n\n/u/{post.author.name} can reply with `delete` to remove comment. | /r/songacronymbot for feedback."
+    return f"{text}\n---\n\n^[/u/{post.author.name}](/u/{post.author.name}) ^(can reply with \"delete\" to remove comment. |) ^[/r/songacronymbot](/r/songacronymbot) ^(for feedback.)"
