@@ -237,4 +237,4 @@ def is_match(text, keyword):
     return False
     
 def add_footer(post, text: str):
-    return f"{text}\n---\n\nThis is an automated reply to help others understand your acronyms. | /u/{post.author.name} can reply with `delete` to remove this comment. | [Acronyms list for this subreddit.](https://acronym.strideweb.dev/{post.subreddit.id}) | /r/songacronymbot for inquiries/feedback/opt-in/opt-out."
+    return f"{text}\n---\n\n/u/{post.author.name} can reply with `delete` to remove comment. | /r/songacronymbot for feedback."
