@@ -46,7 +46,7 @@ def get_all_acronyms_by_subreddit(id : str):
     acronyms = []
 
     sql = SQLInit()
-    sql.cur.execute('SELECT id, acronym, artist, album, album_year, song, subreddit_ids, is_artist, is_album, is_song, is_single FROM "public"."acronym" WHERE subreddit_ids LIKE %s OR subreddit_ids = \'global\'', [id])
+    sql.cur.execute('SELECT id, acronym, artist, album, album_year, song, subreddit_ids, is_artist, is_album, is_song, is_single FROM "public"."acronym" WHERE subreddit_ids LIKE %s OR subreddit_ids = \'global\'', [f'%{id}%'])
     for row in sql.cur:
         acronyms.append(Acronym(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10]))
 
