@@ -1,5 +1,5 @@
-from .models import Blacklist, Comment, Keyword
-from .repository import add_comment, author_is_disabled, get_all_keywords_by_subreddit, is_reply_limit_reached, get_all_subreddits, add_or_update_redditor
+from .models import Acronym, Redditor, Subreddit
+from .repository import add_or_update_redditor, author_is_disabled, get_all_acronyms_by_subreddit, get_all_subreddits
 import praw
 import time
 import os
@@ -55,7 +55,6 @@ def process_comment(comment : praw.models.Comment):
     if reply_text != "":
         try:
             comment.reply(reply_text)
-            add_comment(comment.submission.id, comment.id, 1)
         except:
             print("ERROR :: Processing of comment failed!")
     else:
@@ -68,7 +67,6 @@ def process_submission(submission : praw.models.Submission):
     if reply_text != "":
         try:
             submission.reply(reply_text)
-            add_comment(submission.id, None, 1)
         except:
             print("ERROR :: Processing of submission failed!")
     else:
@@ -79,13 +77,19 @@ def should_opt_out(post):
     if hasattr(post, 'title'):
         return False
 
-    if is_match(post.body.lower(), 'optout'):
-        submission = post.submission
-
-        if submission.id == 'j9yq8q':
-            add_or_update_redditor(post.author.id, post.author.name, 0)
-            post.reply(add_footer(post, f"- Your account has been disabled from receiving automatic replies. At this time, there is no automatic process to re-enable your account.\n"))
+    submission = post.submission
+    if submission.id == 'j9yq8q':
+        if (is_match(post.body.lower(), 'optout')):
+            add_or_update_redditor(post.author.id, post.author.name, '0')
+            post.reply(add_footer(post, f"- Your account has been disabled from receiving automatic replies. To enable your account to receive automatic replies, reply to this thread with `optin`.\n"))
             return True
+
+        # elif (is_match(post.body.lower(), 'optin')):
+        #     add_or_update_redditor(post.author.id, post.author.name, '1')
+        #     post.reply(add_footer(post, f"- Your account has been enabled to receive automatic replies. To disable your account from receiving automatic replies, reply to this thread with `optout`.\n"))
+        #     return True
+
+    return False
 
 def should_delete(post):
     if hasattr(post, 'title'):
@@ -109,15 +113,10 @@ def should_delete(post):
     return False
 
 def should_comment(post):
-    submission_id = post.id
-
-    if hasattr(post, 'body'):
-        submission_id = post.submission.id
-
     if post.author.name == "songacronymbot":
         return False
 
-    if time.time() - post.created_utc > 600:
+    if time.time() - post.created_utc > 1800:
         return False
 
     if is_summon_chain(post):
@@ -132,7 +131,7 @@ def should_comment(post):
         print('SKIPPING :: Author is disabled.')
         return False
     
-    if is_reply_limit_reached(submission_id, 5):
+    if is_reply_limit_reached(post, 5):
         print('SKIPPING :: Reply limit reached.')
         return False
 
@@ -169,7 +168,26 @@ def is_already_replied(post):
 
     return replied
 
+def is_reply_limit_reached(post, limit):
+    count = 0
 
+    if hasattr(post, 'title'):
+        submission = post
+    else:
+        submission = post.submission
+    
+    submission.comments.replace_more(limit=None)
+    for comment in submission.comments.list():
+        try:
+            if comment.author.name == 'songacronymbot':
+                count = count + 1
+        except:
+            pass
+    
+    if count >= limit:
+        return True
+
+    return False
 
 def format_reply(post):
     reply_text = get_comment_text(post)
@@ -180,7 +198,7 @@ def format_reply(post):
     return reply_text
 
 def get_comment_text(post):
-    keywords = get_all_keywords_by_subreddit(post.subreddit.id)
+    acronyms = get_all_acronyms_by_subreddit(post.subreddit.id)
 
     text = ""
     if hasattr(post, 'title'):
@@ -190,14 +208,25 @@ def get_comment_text(post):
 
     comment_text = ""
     
-    for keyword in keywords:
-        if is_match(text, keyword.keyword.lower()):
-            if unique_keyword(post, keyword.keyword.lower()):
-                comment_text += f"- {keyword.comment_text}\n"
+    for acronym in acronyms:
+        if is_match(text, acronym.acronym.lower()):
+            if unique_acronym(post, acronym.acronym.lower()):
+                if  acronym.is_artist and undefined_acronym(post, acronym.artist.lower()):
+                    comment_text += f"- {acronym.acronym} refers to {acronym.artist}.\n"
+
+                elif acronym.is_album and undefined_acronym(post, acronym.album.lower()):
+                    comment_text += f"- {acronym.acronym} refers to *{acronym.album}* ({acronym.album_year}), an album by {acronym.artist}.\n"
+
+                elif acronym.is_single and undefined_acronym(post, acronym.song.lower()):
+                    comment_text += f"- {acronym.acronym} refers to \"{acronym.song}\", a single from {acronym.artist}.\n"
+
+                elif acronym.is_song and undefined_acronym(post, acronym.song.lower()):
+                    comment_text += f"- {acronym.acronym} refers to \"{acronym.song}\", a song from {acronym.artist} album *{acronym.album}* ({acronym.album_year}).\n"
+
             
     return comment_text
 
-def unique_keyword(post, keyword):
+def unique_acronym(post, acronym):
     if hasattr(post, 'title'):
         submission = post
     else:
@@ -206,10 +235,31 @@ def unique_keyword(post, keyword):
     submission.comments.replace_more(limit=None)
     for comment in submission.comments.list():
         if comment.author.name == 'songacronymbot':
-            if keyword in comment.body.lower():
+            if acronym in comment.body.lower():
                 return False
     
     return True
+
+def undefined_acronym(post, definition):
+    if hasattr(post, 'title'):
+        submission = post
+    else:
+        submission = post.submission
+
+    if hasattr(post, 'body'):
+        if definition in post.body.lower():
+                return False
+        
+        if not post.is_root:
+            parent = post.parent()
+            if definition in parent.body.lower():
+                return False
+
+    if definition in submission.title.lower() or definition in submission.selftext.lower():
+        return False
+
+    return True
+
 
 def is_match(text, keyword):
     if debug:

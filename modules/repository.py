@@ -1,49 +1,55 @@
-from .models import Keyword, Subreddit
+from .models import Acronym, Subreddit
 from .sqlinit import SQLInit
-import sqlite3
-
-sql = SQLInit()
+import psycopg2
 
 def get_all_subreddits():
     subreddits = []
-    for row in sql.cur.execute("SELECT Id, SubredditId, Name, Enabled FROM Subreddits"):
-        subreddits.append(Subreddit(row[0], row[1], row[2], row[3]))
+
+    sql = SQLInit()
+    
+    sql.cur.execute('SELECT id, name, enabled FROM "public"."subreddit"')
+    for row in sql.cur:
+        subreddits.append(Subreddit(row[0], row[1], row[2]))
+
+    sql.conn.close()
     
     return subreddits
 
-def author_is_disabled(redditor : str):
-    sql.cur.execute("SELECT * FROM Redditors WHERE Name = ? AND Enabled = 0", [redditor])
+def author_is_disabled(name : str):
+    sql = SQLInit()
+
+    sql.cur.execute('SELECT * FROM "public"."redditor" WHERE name = %s AND enabled = \'0\'', [name])
     result = sql.cur.fetchone()
+
+    sql.conn.close()
+
     if result:
         return True
 
     return False
 
-def add_comment(submission_id: str, comment_id: str, replied: int):
-    sql.cur.execute("INSERT INTO Comments (SubmissionId, CommentId, Replied) VALUES (?, ?, ?)", [submission_id, comment_id, replied])
-    sql.conn.commit()
+def add_or_update_redditor(id : str, name : str, enabled : int):
+    sql = SQLInit()
 
-def add_or_update_redditor(redditor_id : str, name : str, enabled : int):
     try:
         # Try to insert the record.
-        sql.cur.execute("INSERT INTO Redditors (RedditorId, Name, Enabled) VALUES (?, ?, ?)", [redditor_id, name, enabled])
+        sql.cur.execute('INSERT INTO "public"."redditor" (id, name, enabled) VALUES (%s, %s, %s)', [id, name, enabled])
         sql.conn.commit()
+        sql.conn.close()
     except:
         # If this fails, then it must be an update.
-        sql.cur.execute("UPDATE Redditors SET Enabled = ? WHERE RedditorId = ?", [enabled, redditor_id])
+        sql.cur.execute('UPDATE "public"."redditor" SET enabled = %s WHERE id = %s', [enabled, id])
         sql.conn.commit()
+        sql.conn.close()
 
-def is_reply_limit_reached(submission_id : str, reply_limit : int):
-    sql.cur.execute("SELECT COUNT(*) FROM Comments WHERE SubmissionId = ? AND Replied = 1", [submission_id])
-    result = sql.cur.fetchone()
-    if result[0] >= reply_limit:
-        return True
+def get_all_acronyms_by_subreddit(id : str):
+    acronyms = []
 
-    return False
+    sql = SQLInit()
+    sql.cur.execute('SELECT id, acronym, artist, album, album_year, song, subreddit_ids, is_artist, is_album, is_song, is_single FROM "public"."acronym" WHERE subreddit_ids LIKE %s OR subreddit_ids = \'global\'', [id])
+    for row in sql.cur:
+        acronyms.append(Acronym(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10]))
 
-def get_all_keywords_by_subreddit(subreddit_id : str):
-    keywords = []
-    for row in sql.cur.execute("SELECT Id, Keyword, CommentText FROM Keywords WHERE SubredditId = ? OR SubredditId = 'global'", [subreddit_id]):
-        keywords.append(Keyword(row[0], row[1], row[2]))
-        
-    return keywords
+    sql.conn.close()
+
+    return acronyms

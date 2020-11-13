@@ -3,46 +3,48 @@ import sqlite3
 
 sql = SQLInit()
 
-class Blacklist(object):
+class Acronym(object):
     id = 1
-    redditor = ""
-    blacklisted = 0
+    acronym = ''
+    artist = ''
+    album = ''
+    album_year = ''
+    song = ''
+    subreddit_ids = ''
+    is_artist = False
+    is_album = False
+    is_song = False
+    is_single = False
 
-    def __init__(self, id, redditor, blacklisted):
+    def __init__(self, id, acronym, artist, album, album_year, song, subreddit_ids, is_artist, is_album, is_song, is_single):
         self.id = id
-        self.redditor = redditor
-        self.blacklisted = blacklisted
+        self.acronym = acronym
+        self.artist = artist
+        self.album = album
+        self.album_year = album_year
+        self.song = song
+        self.subreddit_ids = subreddit_ids
+        self.is_artist = is_artist
+        self.is_album = is_album
+        self.is_song = is_song
+        self.is_single = is_single
 
-class Comment(object):
+class Redditor(object):
     id = 1
-    submission_id = 1
-    comment_id = 1
-    replied = 0
+    name = ""
+    enabled = False
 
-    def __init__(self, id, submission_id, comment_id, replied):
+    def __init__(self, id, name, enabled):
         self.id = id
-        self.submission_id = submission_id
-        self.comment_id = comment_id
-        self.replied = replied
-
-class Keyword(object):
-    id = 1
-    keyword = ""
-    comment_text = ""
-
-    def __init__(self, id, keyword, comment_text):
-        self.id = id
-        self.keyword = keyword
-        self.comment_text = comment_text
+        self.name = name
+        self.enabled = enabled
 
 class Subreddit(object):
-    id = 1
-    subreddit_id = 1
+    id = 0
     name = ""
     enabled = 0
 
-    def __init__(self, id, subreddit_id, name, enabled):
+    def __init__(self, id, name, enabled):
         self.id = id
-        self.subreddit_id = subreddit_id
         self.name = name
         self.enabled = enabled

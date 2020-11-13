@@ -1,42 +1,8 @@
-import sqlite3
+from .config import config
+import psycopg2
 
 class SQLInit:
     def __init__(self):
-        self.conn = sqlite3.connect("main.db")
+        dbParams = config("creds")
+        self.conn = psycopg2.connect(**dbParams)
         self.cur = self.conn.cursor()
-        self.cur.execute('''
-                    CREATE TABLE IF NOT EXISTS "Comments" (
-                        "Id"	INTEGER NOT NULL UNIQUE,
-                        "SubmissionId"	TEXT NOT NULL,
-                        "CommentId"	TEXT UNIQUE,
-                        "Replied"	INTEGER DEFAULT 0,
-                        PRIMARY KEY("Id" AUTOINCREMENT)
-                    )
-                ''')
-        self.cur.execute('''
-                    CREATE TABLE IF NOT EXISTS "Keywords" (
-                        "Id"	INTEGER NOT NULL UNIQUE,
-                        "Keyword"	TEXT NOT NULL,
-                        "CommentText"	TEXT NOT NULL,
-                        "SubredditId"	TEXT NOT NULL,
-                        PRIMARY KEY("Id" AUTOINCREMENT)
-                    )
-                ''')
-        self.cur.execute('''
-                    CREATE TABLE IF NOT EXISTS "Redditors" (
-                        "Id"	INTEGER NOT NULL UNIQUE,
-                        "RedditorId"	TEXT NOT NULL UNIQUE,
-                        "Name"	INTEGER NOT NULL UNIQUE,
-                        "Enabled"	INTEGER DEFAULT 0,
-                        PRIMARY KEY("Id" AUTOINCREMENT)
-                    )
-                ''')
-        self.cur.execute('''
-                CREATE TABLE IF NOT EXISTS "Subreddits" (
-                    "Id"	INTEGER NOT NULL UNIQUE,
-                    "SubredditId"	TEXT NOT NULL UNIQUE,
-                    "Name"	TEXT NOT NULL UNIQUE,
-                    "Enabled"	INTEGER DEFAULT 0,
-                    PRIMARY KEY("Id" AUTOINCREMENT)
-                )''')
-        self.conn.commit()
