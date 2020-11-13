@@ -81,7 +81,7 @@ def should_opt_out(post):
     if submission.id == 'j9yq8q':
         if (is_match(post.body.lower(), 'optout')):
             add_or_update_redditor(post.author.id, post.author.name, '0')
-            post.reply(add_footer(post, f"- Your account has been disabled from receiving automatic replies. To enable your account to receive automatic replies, reply to this thread with `optin`.\n"))
+            post.reply(add_footer(post, f"- Your account has been disabled from receiving automatic replies.\n"))
             return True
 
         # elif (is_match(post.body.lower(), 'optin')):
