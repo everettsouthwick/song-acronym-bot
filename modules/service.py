@@ -131,9 +131,11 @@ def should_comment(post):
         print('SKIPPING :: Author is disabled.')
         return False
     
-    if is_reply_limit_reached(post, 5):
-        print('SKIPPING :: Reply limit reached.')
-        return False
+    # Technical overhead of this check is too high for the benefit it provides.
+    # If a more efficient method can be discovered it may be explored, but right now it's too much.
+    # if is_reply_limit_reached(post, 5):
+    #     print('SKIPPING :: Reply limit reached.')
+    #     return False
 
     return True
 
